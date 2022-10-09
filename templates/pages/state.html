@@ -1,0 +1,40 @@
+{% extends 'layouts/main.html' %}
+{% block title %}Fyyur | Search by Area {% endblock %}
+{% block content %}
+<h3>Number of search results {{ search_term }} : {{ response.count }}</h3>
+
+<div style="display: flex; padding-left: 12px;">
+    <div style="width: 300px; color: rgb(255, 103, 1);"><h4>Venues</h4></div>
+    <div style="flex-grow: 1; color: rgb(255, 103, 1);"><h4>Artists</h4></div>
+</div>
+<div style="display: flex;">
+    <div style="width: 300px;">
+        <ul class="items" style="list-style-type: none;">
+            {% for venue in response.venues %}
+                <li>
+                    <a href="/venues/{{ venue.id }}">
+                        <i class="fas fa-music"></i>
+                        <div class="item">
+                            <h5>{{ venue.name }}</h5>
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div style="flex-grow: 1;">
+        <ul class="items" style="list-style-type: none;">
+            {% for artist in response.artists%}
+                <li>
+                    <a href="/artists/{{ artist.id }}">
+                        <i class="fas fa-user"></i>
+                        <div class="item">
+                            <h5>{{ artist.name }}</h5>
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

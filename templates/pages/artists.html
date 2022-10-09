@@ -1,8 +1,10 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Fyyur | Artists{% endblock %}
 {% block content %}
+{% for data in theData %}
+<h3>{{ data.city }}, {{ data.state }}</h3>
 <ul class="items">
-	{% for artist in artists %}
+	{% for artist in data.artists %}
 	<li>
 		<a href="/artists/{{ artist.id }}">
 			<i class="fas fa-users"></i>
@@ -13,4 +15,5 @@
 	</li>
 	{% endfor %}
 </ul>
+{% endfor %}
 {% endblock %}

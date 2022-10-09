@@ -75,6 +75,28 @@
                   aria-label="Search">
               </form>
               {% endif %}
+              {% if (request.endpoint == 'shows') or
+                (request.endpoint == 'show') or
+                (request.endpoint == 'search_shows') %}
+              <form class="search" method="post" action="/shows/search">
+                <input class="form-control"
+                  type="search"
+                  name="search_term"
+                  placeholder="YYYY-MM-DD"
+                  aria-label="Search">
+              </form>
+              {% endif %}
+              {% if (request.endpoint == 'search_by_city_state') or
+                  (request.endpoint == 'index') %}
+                <form action="/state/search" method="post" class="search">
+                  <input type="search" 
+                  class="form-control"
+                  placeholder="City, state"
+                  aria-label="Search"
+                  name="search_term"
+                  >
+                </form>
+              {% endif %}
             </li>
           </ul>
           <ul class="nav navbar-nav">
@@ -89,10 +111,10 @@
     <!-- Begin page content -->
     <main id="content" role="main" class="container">
 
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          {% for message in messages %}
-            <div class="alert alert-block alert-info fade in">
+      {% with errors = get_flashed_messages(with_categories=true) %}
+      {% if errors %}
+        {% for category, message in errors %}
+            <div class="alert alert-{{ category }} fade in">
               <a class="close" data-dismiss="alert">&times;</a>
               {{ message }}
             </div>
