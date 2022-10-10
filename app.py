@@ -162,7 +162,10 @@ def show_venue(venue_id):
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
   # inisiate form
-  form = VenueForm()
+  try:
+    form = VenueForm()
+  except:
+    return redirect(url_for('artists'))
   # send the form to the new venue page, so we can use the VenueForm there
   return render_template('forms/new_venue.html', form=form)
 # done
@@ -386,7 +389,10 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
-  form = ArtistForm()
+  try:
+    form = ArtistForm()
+  except:
+    return redirect(url_for('artists'))
   return render_template('forms/new_artist.html', form=form)
 
 # done
@@ -476,7 +482,11 @@ def shows():
 @app.route('/shows/create')
 def create_shows():
   # renders form. do not touch.
-  form = ShowForm()
+  try:
+    form = ShowForm()
+  except:
+    return redirect(url_for('shows'))
+
   return render_template('forms/new_show.html', form=form)
 # done
 @app.route('/shows/create', methods=['POST'])
