@@ -26,33 +26,14 @@ migrate = Migrate(app, db)
 # Models.
 #----------------------------------------------------------------------------#
 
-# create mutable for genres
-# class Mutable(Mutable, list):
-#   def append(self, value):
-#     list.append(self, value)
-#     self.changed()
-  
-#   def pop(self, value):
-#     list.pop(self,value)
-#     self.change()
-#     return value
-
-#   @classmethod
-#   def cource(cls, key, value):
-#     if not isinstance(value, MutableList):
-#       if isinstance(value, list):
-#         return MutableList(value)
-#       return Mutable.coerce(key,value)
-#     else:
-#       return value
-
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class TheShows(db.Model):
   __tablename__ = 'the_shows'
   id = db.Column(db.Integer, primary_key=True)
   show_date = db.Column(db.DateTime, nullable=True)
-  venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'), nullable=True)
+  venue_id = db.Column(db.Integer, db.ForeignKey('venue.id'), nullable=False)
+  artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'), nullable=False)
+
 
 class Venue(db.Model):
     __tablename__ = 'venue'
@@ -69,7 +50,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String())
     website_link = db.Column(db.String(120))
-    the_shows = db.relationship('TheShows', backref='venue', lazy='joined', cascade="all, delete")
+    artist = db.relationship('TheShows', backref='venue', lazy='joined', cascade="all, delete")
 
 class Artist(db.Model):
     __tablename__ = 'artist'
@@ -84,6 +65,6 @@ class Artist(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String())
-    genres = db.Column(MutableList.as_mutable(db.ARRAY(db.String(120))))
+    genres = db.Column(db.ARRAY(db.String(120)))
     website_link = db.Column(db.String(120))
-    the_shows = db.relationship('TheShows', backref='artist', lazy='joined', cascade="all, delete")
+    venue = db.relationship('TheShows', backref='artist', lazy='joined', cascade="all, delete")

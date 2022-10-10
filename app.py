@@ -10,11 +10,17 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
-from sqlalchemy import exc, or_, Date, cast, extract
+from sqlalchemy import exc, or_, Date, cast, extract, select
+from sqlalchemy.orm import join
 from datetime import date, datetime
 #----------------------------------------------------------------------------#
 # Filters.
 #----------------------------------------------------------------------------#
+
+
+# models/tables in models.py, I separate it. flask db init to make initial migrates folder, 
+# then flask db migrate and flask db upgrade to make the tabel in database created
+
 
 def format_datetime(value, format='medium'):
   date = dateutil.parser.parse(value)
@@ -25,6 +31,9 @@ def format_datetime(value, format='medium'):
   return babel.dates.format_datetime(date, format, locale='en')
 
 app.jinja_env.filters['datetime'] = format_datetime
+
+# table class in models.py, I separate it. flask db init to make initial migrates folder, 
+# then flask db migrate and upgrade to make the tabel in database created
 
 #----------------------------------------------------------------------------#
 # Controllers.
@@ -105,36 +114,35 @@ def show_venue(venue_id):
   # get current time
   time_now = datetime.now()
   # get show that had been played there in the past
-  past_shows = TheShows.query.filter(TheShows.venue_id==venue.id, TheShows.show_date <= time_now).all()
+  # we can use this code too : db.session.query(TheShows).join(Artist).all() 
+  # but it opens session, so I think this code better:
+  past_shows = TheShows.query.join(Artist).add_columns(TheShows.show_date, Artist.id, Artist.name, Artist.image_link).filter(TheShows.venue_id==venue_id, TheShows.show_date <= time_now).all()
   pshows = []
   # append all shows that had been played to an array
   for past_show in past_shows:
     # structure it to the right form in object
-    artist = Artist.query.get(past_show.artist_id)
-    ps = {'artist_id' : past_show.artist_id,
-    'artist_name' : artist.name,
-    'artist_image_link' : artist.image_link,
+    ps = {'artist_id' : past_show.id,
+    'artist_name' : past_show.name,
+    'artist_image_link' : past_show.image_link,
     'start_time' : str(past_show.show_date)
     }
     pshows.append(ps)
   # get show that will be there
-  upcoming_shows = TheShows.query.filter(TheShows.venue_id==venue.id, TheShows.show_date > time_now).all()
+  upcoming_shows = TheShows.query.join(Artist).add_columns(TheShows.show_date, Artist.id, Artist.name, Artist.image_link).filter(TheShows.venue_id==venue_id, TheShows.show_date > time_now).all()
   upshows = []
   # append all shows that will be there to an obj
   for upcoming_show in upcoming_shows:
     # structure it to the right form in object
-    artist = Artist.query.get(upcoming_show.artist_id)
-    us = {'artist_id' : upcoming_show.artist_id,
-    'artist_name' : artist.name,
-    'artist_image_link' : artist.image_link,
+    us = {'artist_id' : upcoming_show.id,
+    'artist_name' : upcoming_show.name,
+    'artist_image_link' : upcoming_show.image_link,
     'start_time' : str(upcoming_show.show_date)
     }
     upshows.append(us)
 
   # get the number of past shows and upcoming shows
-  past_shows_count = TheShows.query.filter(TheShows.venue_id==venue.id, TheShows.show_date <= time_now).count()
-  upcoming_shows_count = TheShows.query.filter(TheShows.venue_id==venue.id, TheShows.show_date > time_now).count()
-
+  past_shows_count = TheShows.query.join(Artist).add_columns(TheShows.show_date, Artist.id, Artist.name, Artist.image_link).filter(TheShows.venue_id==venue_id, TheShows.show_date <= time_now).count()
+  upcoming_shows_count = TheShows.query.join(Artist).add_columns(TheShows.show_date, Artist.id, Artist.name, Artist.image_link).filter(TheShows.venue_id==venue_id, TheShows.show_date > time_now).count()
   # structure the data object with the right form
   data = {
     'id' : venue.id,
@@ -151,8 +159,8 @@ def show_venue(venue_id):
     'image_link' : venue.image_link,
     'past_shows' : pshows,
     'upcoming_shows' : upshows,
-    'past.shows.count' : past_shows_count,
-    'upcoming.shows.count' : upcoming_shows_count
+    'past_shows_count' : past_shows_count,
+    'upcoming_shows_count' : upcoming_shows_count
   }
   return render_template('pages/show_venue.html', venue=data)
 
@@ -296,28 +304,26 @@ def show_artist(artist_id):
   # TODO: replace with real artist data from the artist table, using artist_id
   artist = Artist.query.get(artist_id)
   time_now = datetime.now()
-  the_past_shows = TheShows.query.filter(TheShows.artist_id==artist_id, TheShows.show_date < time_now).all()
+  the_past_shows = TheShows.query.join(Venue).add_columns(TheShows.show_date, Venue.id, Venue.name, Venue.image_link).filter(TheShows.artist_id==artist_id, TheShows.show_date <= time_now).all()
   past_shows = []
   for the_past_show in the_past_shows:
-    venue = Venue.query.get(the_past_show.venue_id)
     past_shows.append({
-      'venue_id' : the_past_show.venue_id,
-      'venue_name' : venue.name,
-      'venue_image_link' : venue.image_link,
+      'venue_id' : the_past_show.id,
+      'venue_name' : the_past_show.name,
+      'venue_image_link' : the_past_show.image_link,
       'start_time' : str(the_past_show.show_date)
     })
-  the_upcoming_shows = TheShows.query.filter(TheShows.artist_id==artist_id, TheShows.show_date > time_now).all()
+  the_upcoming_shows = TheShows.query.join(Venue).add_columns(TheShows.show_date, Venue.id, Venue.name, Venue.image_link).filter(TheShows.artist_id==artist_id, TheShows.show_date > time_now).all()
   upcoming_shows = []
   for the_upcoming_show in the_upcoming_shows:
-    venue = Venue.query.get(the_upcoming_show.venue_id)
     upcoming_shows.append({
       'venue_id' : the_upcoming_show.venue_id,
-      'venue_name' : venue.name,
-      'venue_image_link' : venue.image_link,
+      'venue_name' : the_upcoming_show.name,
+      'venue_image_link' : the_upcoming_show.image_link,
       'start_time' : str(the_upcoming_show.show_date)
     })
-  past_shows_count = TheShows.query.filter(TheShows.artist_id==artist_id, TheShows.show_date < time_now).count()
-  upcoming_shows_count = TheShows.query.filter(TheShows.artist_id==artist_id, TheShows.show_date > time_now).count()
+  past_shows_count = TheShows.query.join(Venue).add_columns(TheShows.show_date, Venue.id, Venue.name, Venue.image_link).filter(TheShows.artist_id==artist_id, TheShows.show_date <= time_now).count()
+  upcoming_shows_count = TheShows.query.join(Venue).add_columns(TheShows.show_date, Venue.id, Venue.name, Venue.image_link).filter(TheShows.artist_id==artist_id, TheShows.show_date > time_now).count()
   data = {
     'id' : artist.id,
     'name' : artist.name,
@@ -525,20 +531,19 @@ def search_shows():
   if search_term == '' :
     return redirect(url_for('shows'))
   
-  venues = Venue.query.filter(Venue.name.ilike('%' + search_term + '%')).all()
-  count = Venue.query.filter(Venue.name.ilike('%' + search_term + '%')).count()
+  venues = Venue.query.join(TheShows).add_columns(Venue.id, Venue.name, TheShows.artist_id ,TheShows.show_date).filter(Venue.name.ilike('%' + search_term + '%')).all()
+  count = Venue.query.join(TheShows).add_columns(Venue.id, Venue.name, TheShows.artist_id, TheShows.show_date).filter(Venue.name.ilike('%' + search_term + '%')).count()
   data = []
   response = {}
   for venue in venues:
-    show = TheShows.query.filter_by(venue_id = venue.id).first()
-    artist = Artist.query.get(show.artist_id)
+    artist = Artist.query.get(venue.artist_id)
     data.append({
       'venue_id' : venue.id,
       'venue_name' : venue.name,
-      'artist_id' : artist.id,
+      'artist_id' : venue.artist_id,
       'artist_name' : artist.name,
       'artist_image_link' : artist.image_link,
-      'start_time' : str(show.show_date)
+      'start_time' : str(venue.show_date)
     })
   
   response = {
