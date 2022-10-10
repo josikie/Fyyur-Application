@@ -173,7 +173,7 @@ def create_venue_submission():
   data = ''
   # get the form with its data from user
   form = VenueForm(request.form)
-
+  error = False
   # 1. Take the data from the form, 
   # 2. make new venue,
   # 3. if the data is validate, then add new venue object to the database,
@@ -190,22 +190,26 @@ def create_venue_submission():
     facebook_link = form.facebook_link.data
     seeking_talent = form.seeking_talent.data
     seeking_description = form.seeking_description.data
-    venue = Venue(name=name, city=city, state=state, address=address, genres=genres, 
+    venue = Venue(city=city, state=state, address=address, genres=genres, 
     phone=phone, image_link=image_link, facebook_link=facebook_link, 
     seeking_talent=seeking_talent, seeking_description=seeking_description)
     if form.validate() :
       db.session.add(venue)
       db.session.commit()
       data = venue.name
-      flash('Venue ' + data + ' was successfully listed!', 'info')
-      return redirect(url_for('index'))
   except exc.SQLAlchemyError as e:
     app.logger.error(e)
     db.session.rollback()
-    flash('An error occurred. Venue ' + data + ' could not be listed.', 'danger')
-    return redirect(url_for('index'))
+    error = True
   finally:
     db.session.close()
+
+  if error:
+    flash('An error occurred. Venue ' + data + ' could not be listed.', 'danger')
+    return redirect(url_for('index'))
+  else:
+    flash('Venue ' + data + ' was successfully listed!', 'info')
+    return redirect(url_for('index'))
 
 #done
 @app.route('/venues/<venue_id>/delete', methods=['POST'])
@@ -393,6 +397,7 @@ def create_artist_submission():
   # TODO: modify data to be the data object returned from db insertion
   form = ArtistForm(request.form)
   data = ''
+  error = False
   try:
     name = form.name.data
     data = name
@@ -417,12 +422,18 @@ def create_artist_submission():
   except exc.SQLAlchemyError as e:
     app.logger.error(e)
     db.session.rollback()
-     # TODO: on unsuccessful db insert, flash an error instead.
-    flash('An error occurred. ' + data + ' could not be listed.', 'danger')
-    return redirect(url_for('index'))
+    error = True
   finally:
     db.session.close()
-
+  
+  if error:
+    # TODO: on unsuccessful db insert, flash an error instead.
+    flash('An error occurred. ' + data + ' could not be listed.', 'danger')
+    return redirect(url_for('index'))
+  else:
+    # on successful db insert, flash success
+    flash('Artist ' + data + ' was successfully listed!', 'info')
+    return redirect(url_for('index'))
 #done
 @app.route('/artists/<artist_id>/delete', methods=['POST'])
 def delete_artist(artist_id):
@@ -482,16 +493,19 @@ def create_show_submission():
     if form.validate():
       db.session.add(show)
       db.session.commit()
-      flash('Show successfully listed!', 'info')
-      return redirect(url_for('index'))
   except exc.SQLAlchemyError as e:
     app.logger.error(e)
     db.session.rollback()
     error = True
-    flash('An error occurred. Show could not be listed.', 'danger')
-    return redirect(url_for('index'))
   finally:
     db.session.close()
+
+  if error:
+    flash('An error occurred. Show could not be listed.', 'danger')
+    return redirect(url_for('index'))
+  else:
+    flash('Show successfully listed!', 'info')
+    return redirect(url_for('index'))
 # done
 @app.route('/shows/search', methods=['POST'])
 def search_shows():
@@ -500,18 +514,18 @@ def search_shows():
   
   if search_term == '' :
     return redirect(url_for('shows'))
-  #the_shows = TheShows.query.filter(cast(TheShows.show_date, Date) == cast(search_term, Date)).all()
-  the_shows = TheShows.query.filter(cast(TheShows.show_date, Date) == cast(search_term, Date)).all()
-  count = TheShows.query.filter(cast(TheShows.show_date, Date) == cast(search_term, Date)).count()
+  
+  venues = Venue.query.filter(Venue.name.ilike('%' + search_term + '%')).all()
+  count = Venue.query.filter(Venue.name.ilike('%' + search_term + '%')).count()
   data = []
   response = {}
-  for show in the_shows:
-    venue = Venue.query.get(show.venue.id)
+  for venue in venues:
+    show = TheShows.query.filter_by(venue_id = venue.id).first()
     artist = Artist.query.get(show.artist_id)
     data.append({
-      'venue_id' : show.venue_id,
+      'venue_id' : venue.id,
       'venue_name' : venue.name,
-      'artist_id' : show.artist_id,
+      'artist_id' : artist.id,
       'artist_name' : artist.name,
       'artist_image_link' : artist.image_link,
       'start_time' : str(show.show_date)
