@@ -20,7 +20,7 @@ moment = Moment(app)
 
 # TODO: connect to a local postgresql database
 app.config.from_object('config')
-db = SQLAlchemy(app)
+db = SQLAlchemy()
 migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
@@ -50,7 +50,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String())
     website_link = db.Column(db.String(120))
-    artist = db.relationship('TheShows', backref='venue', lazy='joined', cascade="all, delete")
+    the_shows = db.relationship('TheShows', backref='venue', lazy='joined', cascade="all, delete")
 
 class Artist(db.Model):
     __tablename__ = 'artist'
@@ -67,4 +67,4 @@ class Artist(db.Model):
     seeking_description = db.Column(db.String())
     genres = db.Column(db.ARRAY(db.String(120)))
     website_link = db.Column(db.String(120))
-    venue = db.relationship('TheShows', backref='artist', lazy='joined', cascade="all, delete")
+    the_shows = db.relationship('TheShows', backref='artist', lazy='joined', cascade="all, delete")
