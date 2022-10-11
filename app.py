@@ -252,8 +252,8 @@ def artists():
   data = []
   cities = Artist.query.with_entities(Artist.city, Artist.state).distinct()
   for city in cities:
-    ccity = city['city']
-    sstate = city['state']
+    ccity = city.city
+    sstate = city.state
     theArtists = Artist.query.filter_by(city = ccity, state = sstate).all()
     artistArr = []
     for artist in theArtists:
