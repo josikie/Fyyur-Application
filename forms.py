@@ -1,9 +1,11 @@
 from datetime import datetime
+from distutils.log import error
 from email.policy import default
 from flask_wtf import FlaskForm as Form
 from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
 from wtforms.validators import DataRequired, AnyOf, URL
-
+import re
+from enums import Genre, State
 state_choices=[
             ('AL', 'AL'),
             ('AK', 'AK'),
@@ -57,6 +59,7 @@ state_choices=[
             ('WI', 'WI'),
             ('WY', 'WY'),
         ]
+
 genres_choices=[
             ('Alternative', 'Alternative'),
             ('Blues', 'Blues'),
@@ -78,6 +81,11 @@ genres_choices=[
             ('Soul', 'Soul'),
             ('Other', 'Other'),
         ]
+
+def is_valid_phone(number):
+    regex = re.compile('^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$')
+    return regex.match(number)
+
 class ShowForm(Form):
     artist_id = StringField(
         'artist_id', validators=[DataRequired()]
@@ -100,7 +108,7 @@ class VenueForm(Form):
     )
     state = SelectField(
         'state', validators=[DataRequired()],
-        choices=state_choices
+        choices=State.choices()
     )
     address = StringField(
         'address', validators=[DataRequired()]
@@ -114,7 +122,7 @@ class VenueForm(Form):
     genres = SelectMultipleField(
         # TODO implement enum restriction
         'genres', validators=[DataRequired()],
-        choices=genres_choices
+        choices=Genre.choices()
     )
     facebook_link = StringField(
         'facebook_link'
@@ -128,8 +136,22 @@ class VenueForm(Form):
     seeking_description = StringField(
         'seeking_description'
     )
-
-
+    def validate(self):
+        """ define a custom validate form method """
+        rv = Form.validate(self)
+        if not rv:
+            return False
+        if not is_valid_phone(self.phone.data):
+            self.phone.errors.append('Invalid phone.')
+            return False
+        if not set(self.genres.data).issubset(dict(Genre.choices())).keys():
+            self.genres.errors.append('Invalid genres.')
+            return False
+        if self.state.data not in dict(State.choices()).keys():
+            self.state.errors.append('Invalid states.')
+            return False
+        # if pass validation
+        return True
 
 class ArtistForm(Form):
     name = StringField(
@@ -140,7 +162,7 @@ class ArtistForm(Form):
     )
     state = SelectField(
         'state', validators=[DataRequired()],
-        choices=state_choices
+        choices=State.choices()
     )
     phone = StringField(
         # TODO implement validation logic for state
@@ -151,7 +173,7 @@ class ArtistForm(Form):
     )
     genres = SelectMultipleField(
         'genres', validators=[DataRequired()],
-        choices=genres_choices
+        choices=Genre.choices()
     )
     facebook_link = StringField(
         # TODO implement enum restriction
@@ -167,4 +189,21 @@ class ArtistForm(Form):
     seeking_description = StringField(
             'seeking_description'
      )
+
+    def validate(self):
+        """ define a custom validate form method """
+        rv = Form.validate(self)
+        if not rv:
+            return False
+        if not is_valid_phone(self.phone.data):
+            self.phone.errors.append('Invalid phone.')
+            return False
+        if not set(self.genres.data).issubset(dict(Genre.choices())).keys():
+            self.genres.errors.append('Invalid genres.')
+            return False
+        if self.state.data not in dict(State.choices()).keys():
+            self.state.errors.append('Invalid states.')
+            return False
+        # if pass validation
+        return True
 
