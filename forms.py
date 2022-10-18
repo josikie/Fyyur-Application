@@ -69,7 +69,7 @@ class VenueForm(Form):
         if not is_valid_phone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
-        if not set(self.genres.data).issubset(dict(Genre.choices())).keys():
+        if not set(self.genres.data).issubset(dict(Genre.choices()).keys()):
             self.genres.errors.append('Invalid genres.')
             return False
         if self.state.data not in dict(State.choices()).keys():
@@ -123,7 +123,7 @@ class ArtistForm(Form):
         if not is_valid_phone(self.phone.data):
             self.phone.errors.append('Invalid phone.')
             return False
-        if not set(self.genres.data).issubset(dict(Genre.choices())).keys():
+        if not set(self.genres.data).issubset(dict(Genre.choices()).keys()):
             self.genres.errors.append('Invalid genres.')
             return False
         if self.state.data not in dict(State.choices()).keys():

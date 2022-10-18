@@ -1,4 +1,5 @@
 from operator import or_
+from queue import Empty
 from models import TheShows, db, Artist, Venue
 import dateutil.parser
 from flask_moment import Moment
@@ -77,16 +78,8 @@ def venues():
     }
     data.append(obj)
 
-  # data = [{
-  #   'city' : '',
-  #   'state' : '',
-  #   'venues' : [{
-
-  #   }, {
-      
-  #   }]
-
-  # }]
+  if len(data) == 0:
+    return render_template('pages/empty.html', link="/venue/create")
   return render_template('pages/venues.html', areas=data);
 # done
 @app.route('/venues/search', methods=['POST'])
@@ -106,6 +99,7 @@ def search_venues():
     'count' : len(data),
     'data' : data
   }
+
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 # done
 @app.route('/venues/<int:venue_id>')
@@ -268,7 +262,8 @@ def artists():
       'artists' : artistArr
     })
 
-    
+  if len(data) == 0:
+    return render_template('pages/empty.html', link='/artists/create')
   return render_template('pages/artists.html', theData=data)
 
 # done
@@ -479,6 +474,8 @@ def shows():
       'artist_image_link' : artist.image_link,
       'start_time' : str(show.show_date)
     })
+  if len(showsArr) == 0:
+    return render_template('pages/empty.html', link='/shows/create')
   return render_template('pages/shows.html', shows=showsArr)
 
 @app.route('/shows/create')
