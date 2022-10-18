@@ -3,7 +3,8 @@ Fyyur
 
 ## Introduction
 
-I passed this submission. This is first task project in Fullstack Nanodegree Program at Udacity. I change mock data into real data from database.
+This is first task project in Fullstack Nanodegree Program at Udacity. I passed this submission. My job was to change mock data into real data from database. Even I already passed the submission, I still update the code and add some useful features such as useful empty page with its message, format for venues, artists, or shows pages when there is no data in it, implement enum for form validation, change the logic code to best practices after I learn something better, and many more in the future. 
+
 Fyyur is a musical venue and artist booking site that facilitates the discovery and bookings of shows between local performing artists and venues. This site lets you list new artists and venues, discover them, and list shows with artists as a venue owner.
 
 My job is to build out the data models to power the API endpoints for the Fyyur site by connecting to a PostgreSQL database for storing, querying, and creating information about artists and venues on Fyyur.
