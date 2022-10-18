@@ -79,7 +79,7 @@ def venues():
     data.append(obj)
 
   if len(data) == 0:
-    return render_template('pages/empty.html', link="/venue/create")
+    return render_template('pages/empty.html', link="/venues/create")
   return render_template('pages/venues.html', areas=data);
 # done
 @app.route('/venues/search', methods=['POST'])
