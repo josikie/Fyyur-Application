@@ -52,7 +52,6 @@ def index():
 #  ----------------------------------------------------------------
 
 @app.route('/venues')
-# done
 def venues():
   # TODO: replace with real venues data.
   #       num_upcoming_shows should be aggregated based on number of upcoming shows per venue. (done)
@@ -79,10 +78,10 @@ def venues():
     data.append(obj)
 
   if len(data) == 0:
-    return render_template('pages/empty.html', link="/venues/create")
+    return render_template('pages/empty.html', link="/venue")
   return render_template('pages/venues.html', areas=data);
 # done
-@app.route('/venues/search', methods=['POST'])
+@app.route('/venues', methods=['POST'])
 def search_venues():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for Hop should return "The Musical Hop".
@@ -154,7 +153,7 @@ def show_venue(venue_id):
 #  Create Venue
 #  ----------------------------------------------------------------
 # 
-@app.route('/venues/create', methods=['GET'])
+@app.route('/venue', methods=['GET'])
 def create_venue_form():
   # inisiate form
   try:
@@ -164,7 +163,7 @@ def create_venue_form():
   # send the form to the new venue page, so we can use the VenueForm there
   return render_template('forms/new_venue.html', form=form)
 # done
-@app.route('/venues/create', methods=['POST'])
+@app.route('/venue', methods=['POST'])
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion (done)
@@ -263,11 +262,11 @@ def artists():
     })
 
   if len(data) == 0:
-    return render_template('pages/empty.html', link='/artists/create')
+    return render_template('pages/empty.html', link='/artist')
   return render_template('pages/artists.html', theData=data)
 
 # done
-@app.route('/artists/search', methods=['POST'])
+@app.route('/artists', methods=['POST'])
 def search_artists():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
@@ -339,7 +338,7 @@ def edit_artist(artist_id):
   # TODO: populate form with fields from artist with ID <artist_id>
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
-@app.route('/artists/<int:artist_id>/edit', methods=['POST'])
+@app.route('/artists/<int:artist_id>', methods=['POST'])
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
@@ -361,7 +360,7 @@ def edit_venue(venue_id):
   # TODO: populate form with values from venue with ID <venue_id>
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
-@app.route('/venues/<int:venue_id>/edit', methods=['POST'])
+@app.route('/venues/<int:venue_id>', methods=['POST'])
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
@@ -379,7 +378,7 @@ def edit_venue_submission(venue_id):
 #  Create Artist
 #  ----------------------------------------------------------------
 
-@app.route('/artists/create', methods=['GET'])
+@app.route('/artist', methods=['GET'])
 def create_artist_form():
   try:
     form = ArtistForm()
@@ -388,7 +387,7 @@ def create_artist_form():
   return render_template('forms/new_artist.html', form=form)
 
 # done
-@app.route('/artists/create', methods=['POST'])
+@app.route('/artist', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
@@ -475,10 +474,10 @@ def shows():
       'start_time' : str(show.show_date)
     })
   if len(showsArr) == 0:
-    return render_template('pages/empty.html', link='/shows/create')
+    return render_template('pages/empty.html', link='/show')
   return render_template('pages/shows.html', shows=showsArr)
 
-@app.route('/shows/create')
+@app.route('/show')
 def create_shows():
   # renders form. do not touch.
   try:
@@ -488,7 +487,7 @@ def create_shows():
 
   return render_template('forms/new_show.html', form=form)
 # done
-@app.route('/shows/create', methods=['POST'])
+@app.route('/show', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
@@ -521,7 +520,7 @@ def create_show_submission():
     flash('Show successfully listed!', 'info')
     return redirect(url_for('index'))
 # done
-@app.route('/shows/search', methods=['POST'])
+@app.route('/shows', methods=['POST'])
 def search_shows():
   # TODO: impelement search on shows with partial date search. 
   search_term = request.form.get('search_term', '')
@@ -553,7 +552,7 @@ def search_shows():
 
 #  Search by City, State
 #  -----------------------------------------------------------------
-@app.route('/state/search', methods=['POST'])
+@app.route('/state', methods=['POST'])
 def search_by_city_state():
   # TODO: implement search by city, state
   search_term = request.form.get('search_term', '')
